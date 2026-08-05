@@ -1,0 +1,6 @@
+{
+  "name": "crashing-adapter",
+  "language": "Node.js (test fixture)",
+  "description": "Always exits non-zero, regardless of input. Used to test that the core handles adapter crashes gracefully.",
+  "run": "node crash.js"
+}

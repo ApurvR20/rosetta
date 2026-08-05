@@ -1,0 +1,6 @@
+{
+  "name": "php-case-converter",
+  "language": "PHP",
+  "description": "Converts identifier case styles (snake_case, camelCase, PascalCase, kebab-case) using plain PHP with no dependencies.",
+  "run": "php adapter.php"
+}

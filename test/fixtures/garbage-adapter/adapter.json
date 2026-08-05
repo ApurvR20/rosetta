@@ -1,0 +1,6 @@
+{
+  "name": "garbage-adapter",
+  "language": "Node.js (test fixture)",
+  "description": "Exits 0 but writes non-JSON to stdout. Used to test that the core handles malformed adapter output gracefully.",
+  "run": "node garbage.js"
+}

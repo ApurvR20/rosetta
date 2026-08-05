@@ -1,0 +1,6 @@
+{
+  "name": "go-case-converter",
+  "language": "Go",
+  "description": "Converts identifier case styles (snake_case, camelCase, PascalCase, kebab-case) using the Go standard library only.",
+  "run": "go run adapter.go"
+}

@@ -1,0 +1,7 @@
+node_modules/
+*.log
+.DS_Store
+
+# Compiled adapter binaries, if a contributor builds instead of `go run`
+adapters/go/adapter
+adapters/go/*.exe
