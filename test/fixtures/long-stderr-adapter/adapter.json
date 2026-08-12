@@ -1,0 +1,6 @@
+{
+  "name": "long-stderr-adapter",
+  "language": "Node.js (test fixture)",
+  "description": "Produces a very long stderr output and exits non-zero.",
+  "run": "node long-stderr.js"
+}

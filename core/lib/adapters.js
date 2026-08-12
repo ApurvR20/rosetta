@@ -131,11 +131,13 @@ function runAdapter(adapter, payload, { timeoutMs = 20000 } = {}) {
       clearTimeout(timer);
 
       if (code !== 0) {
+        const MAX_STDERR_LENGTH = 500;  
+        const stderrMessage = stderr.trim();
+        const truncatedStderr = stderrMessage.length > MAX_STDERR_LENGTH ? `${stderrMessage.slice(0, MAX_STDERR_LENGTH)}...` : stderrMessage;
         resolve({
           output: null,
-          error: `Adapter "${adapter.manifest.name}" exited with code ${code}.${
-            stderr.trim() ? ` stderr: ${stderr.trim()}` : ''
-          }`,
+          error: `Adapter "${adapter.manifest.name}" exited with code ${code}. ` + `Check the adapter's run command in adapter.json.` +
+          (truncatedStderr ? ` stderr: ${truncatedStderr}` : ''),
         });
         return;
       }
