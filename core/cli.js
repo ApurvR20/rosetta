@@ -24,6 +24,11 @@ Usage:
 
       <style> is one of: ${VALID_CASE_STYLES.join(', ')}
 
+  rosetta convert --pipeline <adapter:style,adapter:style,...> (--input <string> | --file <path>)
+      The pipeline requires at least two comma-separated stages, which run from left to right.
+      The first stage receives the provided input.
+      Each later stage receives the preceding stage's output.
+
   rosetta help
       Show this message.
 
@@ -31,6 +36,7 @@ Examples:
   rosetta list
   rosetta convert --adapter php-case-converter --from snake --to camel --input hello_world
   rosetta convert --adapter go-case-converter --to pascal --file ./identifiers.txt
+  rosetta convert --pipeline php-case-converter:camel,go-case-converter:kebab --input hello_world
 
 Adapters are discovered under adapters/<language>/adapter.json. See
 docs/ADAPTER_CONTRACT.md for the full stdin/stdout JSON contract, and
@@ -75,6 +81,7 @@ function listAdapters() {
 async function convert(flags) {
   const {
     adapter: adapterId,
+    pipeline,
     from,
     to,
     input,
@@ -86,7 +93,10 @@ async function convert(flags) {
     kebab,
   } = flags;
 
-  if (!adapterId || typeof adapterId !== 'string') {
+  if (
+    (!adapterId || typeof adapterId !== 'string') &&
+    (!pipeline || typeof pipeline !== 'string')
+  ) {
     console.error(
       'Error: --adapter <name> is required. Run `rosetta list` to see available adapters.'
     );
@@ -97,7 +107,7 @@ async function convert(flags) {
   const missingToFlag = !to || typeof to !== "string" || !VALID_CASE_STYLES.includes(to);
   const hasDirectToFlag = !!(camel || snake || pascal || kebab);
 
-  if (missingToFlag && !hasDirectToFlag) {
+  if (typeof pipeline !== 'string' && missingToFlag && !hasDirectToFlag) {
     // if the to flag was not passed and none of the "direct to" flags were passed then
     // this will throw
     console.error(
@@ -123,6 +133,78 @@ async function convert(flags) {
       'Error: provide input via --input <string> or --file <path>.'
     );
     process.exitCode = 1;
+    return;
+  }
+
+  if (typeof pipeline === 'string') {
+    const stageStrings = pipeline.split(',');
+
+    if (stageStrings.length < 2) {
+      console.error(
+        'Error: pipeline requires at least two stages'
+      );
+      process.exitCode = 1;
+      return;
+    }
+
+    const invalidStageIndex = stageStrings.findIndex((stageString) => {
+      const stageParts = stageString.split(':');
+      return stageParts.length !== 2 || stageParts.some((stagePart) => !stagePart);
+    });
+
+    if (invalidStageIndex !== -1) {
+      console.error(
+        `Error: pipeline stage ${invalidStageIndex + 1} must use the format adapter:style`
+      );
+      process.exitCode = 1;
+      return;
+    }
+
+    const stages = stageStrings.map((stageString) => {
+      const [adapterName, targetStyle] = stageString.split(':');
+      const adapter = findAdapter(ADAPTERS_DIR, adapterName);
+
+      return {
+        adapterName,
+        targetStyle,
+        adapter,
+      };
+    });
+
+    const unknownAdapterIndex = stages.findIndex((stage) => {
+      return !stage.adapter;
+    });
+
+    if (unknownAdapterIndex !== -1) {
+      console.error(
+        `Error: pipeline stage ${unknownAdapterIndex + 1} adapter "${stages[unknownAdapterIndex].adapterName}" was not found`
+      );
+      process.exitCode = 1;
+      return;
+    }
+
+    let currentText = text;
+
+    for (const [stageIndex, stage] of stages.entries()) {
+      const payload = {
+        operation: 'convert',
+        input: currentText,
+        options: {
+          from: null,
+          to: stage.targetStyle,
+        },
+      };
+      const result = await runAdapter(stage.adapter, payload);
+      if (result.error) {
+        console.error(
+          `Error: pipeline stage ${stageIndex + 1} adapter "${stage.adapterName}" failed: ${result.error}`
+        );
+        process.exitCode = 1;
+        return;
+      }
+      currentText = result.output;
+    }
+    console.log(currentText);
     return;
   }
 
