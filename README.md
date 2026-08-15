@@ -95,6 +95,42 @@ definitions.
 | PHP      | `adapters/php/` | `php-case-converter` | `php adapter.php`   |
 | Go       | `adapters/go/`  | `go-case-converter`  | `go run adapter.go` |
 
+## Getting Started
+
+In this section of the documentation, we are going to walk through some examples of converting text from snake, camel, pascal and kebab cases using Rosetta and the different adapters which are supported.
+
+### PHP
+
+When using the PHP adapter for Rosetta, all the commands are going to start with `node core/cli.js convert --adapter php-case-converter`. Following this, we can select what case we want to go from, and what case we want to go to using the `--from {case}` and ``--to {case}``. In addition, we will also need to add the text which is going to be converted, we can do this by using the `--input` flag at the end of our command.  
+
+#### Snake Case to Camel Case
+
+In this example, we are going to convert `'welcome_to_rosetta'` (which is currently in Snake Case) to Camel Case.
+
+To do this, we will take our initial PHP command of `node core/cli.js convert --adapter php-case-converter` but add `--from snake` and `--to camel` to it.
+
+This means our full command will be:
+`node core/cli.js convert --adapter php-case-converter --from snake --to camel --input welcome_to_rosetta`
+
+When this is ran using the terminal, the output should be `welcomeToRosetta` which means that the conversion between snake case to camel case using PHP was successful.
+
+### Using Go
+
+As an alternative, we can use a Go adapter for Rosetta. All the commands we are going to use, start with `node core/cli.js convert --adapter go-case-converter` and the same flags to set what case we are going from (`--from`) what case we want the text to be converted to (`--to`) and what text we want to be converted (`--input`)
+
+
+#### Pascal Case to Kebab Case
+
+In this example, we are going to convert `'WelcomeToRosetta'` (which is currently in Pascal Case) to Kebab Case.
+
+To do this, we will take our initial Go command of `node core/cli.js convert --adapter go-case-converter` but add `--from pascal` and `--to kebab` to it.
+
+This means our full command will be:
+`node core/cli.js convert --adapter go-case-converter --from pascal --to kebab --input WelcomeToRosetta`
+
+When this is ran using the terminal, the output should be `welcome-to-rosetta` which means that the conversion between pascal case to kebab case using Go was successful.
+
+
 ## Contributing
 
 We want contributions in as many languages as possible. See
