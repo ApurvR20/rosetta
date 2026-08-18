@@ -129,6 +129,22 @@ async function convert(flags) {
     }
   }
 
+  if (!text && !process.stdin.isTTY) {
+    text = await new Promise((resolve) => {
+      let stdinText = "";
+
+      process.stdin.on("data", (chunk) => {
+        stdinText += chunk.toString("utf8");
+      });
+
+      process.stdin.on("end", () => {
+        resolve(stdinText.trim());
+      });
+
+      process.stdin.resume();
+    });
+  }
+
   if (!text) {
     console.error(
       "Error: provide input via --input <string> or --file <path>.",
