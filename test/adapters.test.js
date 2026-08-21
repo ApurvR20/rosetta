@@ -88,7 +88,11 @@ test("discoverAdapters finds the reference adapters", () => {
   assert.ok(
   names.includes("cpp-case-converter"),
   "C++ adapter should be discovered",
-);
+  );
+  assert.ok(
+    names.includes("python-case-converter"),
+    "python adapter should be discovered",
+  );
 });
 
 test("PHP adapter converts snake_case to camelCase", async () => {
@@ -130,14 +134,14 @@ test("PHP adapter reports a handled error for an unsupported operation", async (
     options: {},
   });
   assert.equal(result.output, null);
-  assert.ok(result.error && result.error.length > 0);
+  assert.equal(result.error, "Unsupported operation: reverse");
 });
 
 test("PHP adapter reports a handled error for empty input", async () => {
   const adapter = findAdapter(ADAPTERS_DIR, "php-case-converter");
   const result = await runAdapter(adapter, convertPayload("", "camel"));
   assert.equal(result.output, null);
-  assert.ok(result.error);
+  assert.equal(result.error, "Input must be a non-empty string.");
 });
 
 test("Go adapter converts kebab-case to PascalCase", async () => {
@@ -185,6 +189,24 @@ test("Go adapter converts direct-to camel flag to camelCase from snake_case", as
   assert.equal(result.output, "helloWorldExample");
 });
 
+test("Python adapter converts snake_case to camelCase", async () => {
+  const adapter = findAdapter(ADAPTERS_DIR, "python-case-converter");
+  assert.ok(adapter, "python adapter must be discoverable");
+  const result = await runAdapter(
+    adapter,
+    convertPayload("hello_world_example", "camel", "snake"),
+  );
+  assert.equal(result.error, null);
+  assert.equal(result.output, "helloWorldExample");
+});
+
+test("Python adapter reports a handled error for empty input", async () => {
+  const adapter = findAdapter(ADAPTERS_DIR, "python-case-converter");
+  const result = await runAdapter(adapter, convertPayload("", "camel"));
+  assert.equal(result.output, null);
+  assert.equal(result.error, "Input must be a non-empty string.");
+});
+
 // TODO: add other direct-to cases
 
 test("Go adapter reports a handled error for an unsupported target case", async () => {
@@ -194,7 +216,7 @@ test("Go adapter reports a handled error for an unsupported target case", async 
     convertPayload("hello_world", "not-a-style", "snake"),
   );
   assert.equal(result.output, null);
-  assert.ok(result.error);
+  assert.equal(result.error, "Unsupported target case: not-a-style");
 });
 
 // TODO: adapter edge-cases using a mix of direct-to
@@ -203,7 +225,7 @@ test("Go adapter reports a handled error for empty input", async () => {
   const adapter = findAdapter(ADAPTERS_DIR, "go-case-converter");
   const result = await runAdapter(adapter, convertPayload("", "camel"));
   assert.equal(result.output, null);
-  assert.ok(result.error);
+  assert.equal(result.error, "input must be a non-empty string");
 });
 
 test("core.runAdapter surfaces an actionable error when an adapter process crashes", async () => {

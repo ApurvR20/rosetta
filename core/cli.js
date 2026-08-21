@@ -36,6 +36,7 @@ Examples:
   rosetta list
   rosetta convert --adapter php-case-converter --from snake --to camel --input hello_world
   rosetta convert --adapter go-case-converter --to pascal --file ./identifiers.txt
+  rosetta convert --adapter go-case-converter --pascal --file ./identifiers.txt
   rosetta convert --pipeline php-case-converter:camel,go-case-converter:kebab --input hello_world
 
 Adapters are discovered under adapters/<language>/adapter.json. See
@@ -106,13 +107,53 @@ async function convert(flags) {
 
   const missingToFlag =
     !to || typeof to !== "string" || !VALID_CASE_STYLES.includes(to);
+
   const hasDirectToFlag = !!(camel || snake || pascal || kebab);
+
 
   if (typeof pipeline !== "string" && missingToFlag && !hasDirectToFlag) {
     // if the to flag was not passed and none of the "direct to" flags were passed then
     // this will throw
     console.error(
       `Error: --to <style> is required and must be one of: ${VALID_CASE_STYLES.join(", ")}, or one of the direct flags must be passed such as --camel or --pascal`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const hasDirectToFlagAndToFlag = hasDirectToFlag && to
+  if (hasDirectToFlagAndToFlag) {
+    // edge case if one of the direct flags and the --to flag is passed, this should error out as
+    // these are conflicting.
+    const directFlag = (() => {
+      if (camel) return 'camel';
+      if (snake) return 'snake';
+      if (pascal) return 'pascal'
+      if (kebab) return 'kebab'
+      return '?'
+    })();
+
+    console.error(
+      `Error: --to ${to} cannot be passed along with --${directFlag} provide one or the other`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const directToFlags = (() => {
+    const directToFlags = [];
+    if (camel) directToFlags.push('camel');
+    if (snake) directToFlags.push("snake");
+    if (pascal) directToFlags.push("pascal");
+    if (kebab) directToFlags.push("kebab");
+
+    return directToFlags;
+  })()
+
+  if (directToFlags.length > 1) {
+    // if multiple directToFlags are passed at the same time, this is also an error
+     console.error(
+      `Error: multiple direct to flags cannot be passed provide one or the other`,
     );
     process.exitCode = 1;
     return;
