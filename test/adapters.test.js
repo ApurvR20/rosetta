@@ -85,6 +85,10 @@ test("discoverAdapters finds the reference adapters", () => {
     names.includes("go-case-converter"),
     "go adapter should be discovered",
   );
+  assert.ok(
+  names.includes("cpp-case-converter"),
+  "C++ adapter should be discovered",
+);
 });
 
 test("PHP adapter converts snake_case to camelCase", async () => {
@@ -261,4 +265,29 @@ test("cli --list-adapters lists all adapters", () => {
     result.includes("go-case-converter"),
     "go-case-converter should be listed",
   );
+});
+
+test("C++ adapter converts snake_case to camelCase", async () => {
+  const adapter = findAdapter(ADAPTERS_DIR, "cpp-case-converter");
+  assert.ok(adapter, "C++ adapter must be discoverable");
+
+  const result = await runAdapter(
+    adapter,
+    convertPayload("hello_world_example", "camel", "snake"),
+  );
+
+  assert.equal(result.error, null);
+  assert.equal(result.output, "helloWorldExample");
+});
+
+test("C++ adapter reports a handled error for an unsupported target case", async () => {
+  const adapter = findAdapter(ADAPTERS_DIR, "cpp-case-converter");
+
+  const result = await runAdapter(
+    adapter,
+    convertPayload("hello_world", "not-a-style", "snake"),
+  );
+
+  assert.equal(result.output, null);
+  assert.ok(result.error);
 });

@@ -33,6 +33,7 @@ core/           Node.js CLI - discovers adapters, dispatches requests, no framew
 adapters/
   php/          Reference adapter written in PHP
   go/           Reference adapter written in Go
+  cpp/          Reference adapter written in C++
 docs/
   ADAPTER_CONTRACT.md   The stdin/stdout JSON contract every adapter implements
 test/
@@ -78,7 +79,11 @@ node core/cli.js convert --adapter php-case-converter --from snake --to camel --
 node core/cli.js convert --adapter go-case-converter --from kebab --to pascal --input hello-world-example
 # -> HelloWorldExample
 
-# Run the test suite (spawns both reference adapters for real)
+# Convert with the C++ reference adapter
+node core/cli.js convert --adapter cpp-case-converter --from snake --to camel --input hello_world_example
+# -> helloWorldExample
+
+# Run the test suite (spawns all reference adapters for real)
 npm test
 ```
 
@@ -90,10 +95,11 @@ definitions.
 
 ## Reference adapters
 
-| Language | Directory       | Manifest name        | Run command         |
-| -------- | --------------- | -------------------- | ------------------- |
-| PHP      | `adapters/php/` | `php-case-converter` | `php adapter.php`   |
-| Go       | `adapters/go/`  | `go-case-converter`  | `go run adapter.go` |
+| Language | Directory       | Manifest name        | Run command                               |
+| -------- | --------------- | -------------------- | ----------------------------------------- |
+| PHP      | `adapters/php/` | `php-case-converter` | `php adapter.php`                         |
+| Go       | `adapters/go/`  | `go-case-converter`  | `go run adapter.go`                       |
+| C++      | `adapters/cpp/` | `cpp-case-converter` | `g++ adapter.cpp -o adapter && ./adapter` |
 
 ## Contributing
 
